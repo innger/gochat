@@ -1,8 +1,8 @@
-# golang聊天室实例
+# golang匿名聊天室 支持@定向消息
 
 本实例基于websocket和jQuery开发。
 [websocket](https://github.com/gorilla/websocket)
-[jQuery](http://jquery.com) 
+[jQuery](http://jquery.com)
 
 本实例特点如下：
 1. 支持浏览器客户端和命令行客户端两种方式。
@@ -15,22 +15,24 @@
 启动服务器。
 
     $ go get github.com/gorilla/websocket
-    $ git clone git@github.com:e421083458/gochat.git
+    $ git clone git@github.com:innger/gochat.git
     $ cd server
     $ go run *.go
 
-运行命令行客户端   
+运行命令行客户端
 
     $ cd client
     $ go run *.go
 
 运行浏览器客户端
-    http://127.0.0.1:8080/
+    http://127.0.0.1/
 
-登陆聊天室输入：
+登录聊天室：
 
-    username=niuyufu&token=123456
+	访问即登录，随机分配用户名，即可开始聊天
 
 跟某人私聊输入：
 
-    @dengyanlu 这是私聊信息！
+    @dengyanlu 私聊信息
+
+后端 goroutine + chan 支持高并发

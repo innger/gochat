@@ -47,11 +47,16 @@ var h = hub{
 	unregister: make(chan *connection),
 	//连接map
 	connections: make(map[*connection]bool),
+	//在线用户数
+
 }
 
 func (h *hub) run() {
+
 	for {
+
 		select {
+
 		//注册者有数据，则插入连接map
 		case c := <-h.register:
 			h.connections[c] = true
@@ -64,20 +69,22 @@ func (h *hub) run() {
 			username := "<b>" + string(c.username) + "</b>"
 			c.send <- []byte("<span style='color:red'>welcome [ " + username + " ] chat secret ^_^</span>")
 			t := time.Now().Format(f_times)
+
 			for tmp_c := range h.connections {
-				tmp_c.send <- []byte("system " + t + " : [ " + username + " join ]")
+				tmp_c.send <- []byte("system " + t + " : [ " + username + " join ] " + fmt.Sprintf("%d", len(h.connections)))
+
 			}
 
 		//非注册者有数据，则删除连接map
 		case c := <-h.unregister:
-			t := time.Now().Format(f_times)
-			username := "<b>" + string(c.username) + "</b>"
-			for tmp_c := range h.connections {
-				tmp_c.send <- []byte("system " + t + " : [ " + username + " gone ]")
-			}
 			if _, ok := h.connections[c]; ok {
 				delete(h.connections, c)
 				close(c.send)
+			}
+			t := time.Now().Format(f_times)
+			username := "<b>" + string(c.username) + "</b>"
+			for tmp_c := range h.connections {
+				tmp_c.send <- []byte("system " + t + " : [ " + username + " gone ] " + fmt.Sprintf("%d", len(h.connections)))
 			}
 		//广播有数据
 		case m := <-h.broadcast:
@@ -117,7 +124,7 @@ func (h *hub) run() {
 						select {
 						//发送数据给连接
 						case c.send <- send_msg:
-							fmt.Println(string(send_msg))
+							fmt.Println("[" + fmt.Sprintf("%d", len(h.connections)) + "]" + string(c.createip) + " " + string(send_msg))
 						//关闭连接
 						default:
 							close(c.send)
@@ -128,7 +135,10 @@ func (h *hub) run() {
 					select {
 					//发送数据给连接
 					case c.send <- send_msg:
-						fmt.Println(string(send_msg))
+						//int 转换成string 不能使用string(12)否则打印出来是空
+						//str1 := strconv.Itoa(i)
+						//str2 := fmt.Sprintf("%d", i)
+						fmt.Println("[" + fmt.Sprintf("%d", len(h.connections)) + "]" + string(c.createip) + " " + string(send_msg))
 					//关闭连接
 					default:
 						close(c.send)
